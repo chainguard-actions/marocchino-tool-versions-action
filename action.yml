@@ -1,0 +1,22 @@
+# @format
+
+name: 'Tool Versions'
+description: 'Output version numbers with .tool-versions file.'
+inputs:
+  path:
+    description: 'path of .tool-versions file'
+    required: true
+    default: '.tool-versions'
+outputs:
+  nodejs:
+    description: 'version of nodejs'
+  ruby:
+    description: 'version of ruby'
+  elixir:
+    description: 'version of elixir'
+  erlang:
+    description: 'version of erlang'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+  pre: chainguard-phonehome.js
