@@ -1,0 +1,60 @@
+name: Test basic usage with multiple tools
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create .tool-versions file
+        run: |
+          cat > .tool-versions <<'EOF'
+          nodejs 18.17.0
+          ruby 3.2.2
+          elixir 1.15.4
+          erlang 26.0.2
+          EOF
+      - id: action
+        uses: .
+        with:
+          path: '.tool-versions'
+      - name: Assert nodejs output
+        env:
+          ACTUAL: ${{ steps.action.outputs.nodejs }}
+        run: |
+          echo "actual nodejs: $ACTUAL"
+          if [ "$ACTUAL" != "18.17.0" ]; then
+            echo "FAIL: expected nodejs '18.17.0', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS nodejs"
+      - name: Assert ruby output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby }}
+        run: |
+          echo "actual ruby: $ACTUAL"
+          if [ "$ACTUAL" != "3.2.2" ]; then
+            echo "FAIL: expected ruby '3.2.2', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS ruby"
+      - name: Assert elixir output
+        env:
+          ACTUAL: ${{ steps.action.outputs.elixir }}
+        run: |
+          echo "actual elixir: $ACTUAL"
+          if [ "$ACTUAL" != "1.15.4" ]; then
+            echo "FAIL: expected elixir '1.15.4', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS elixir"
+      - name: Assert erlang output
+        env:
+          ACTUAL: ${{ steps.action.outputs.erlang }}
+        run: |
+          echo "actual erlang: $ACTUAL"
+          if [ "$ACTUAL" != "26.0.2" ]; then
+            echo "FAIL: expected erlang '26.0.2', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS erlang"

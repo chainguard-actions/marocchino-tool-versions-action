@@ -1,0 +1,54 @@
+name: Test multiple tools version output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create .tool-versions file with multiple tools
+        run: |
+          cat > .tool-versions <<'EOF'
+          nodejs 20.11.0
+          ruby 3.2.2
+          erlang 26.0
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          path: .tool-versions
+
+      - name: Assert nodejs output
+        env:
+          ACTUAL: ${{ steps.action.outputs.nodejs }}
+        run: |
+          echo "actual nodejs: $ACTUAL"
+          if [ "$ACTUAL" != "20.11.0" ]; then
+            echo "FAIL: expected '20.11.0' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS nodejs"
+
+      - name: Assert ruby output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby }}
+        run: |
+          echo "actual ruby: $ACTUAL"
+          if [ "$ACTUAL" != "3.2.2" ]; then
+            echo "FAIL: expected '3.2.2' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS ruby"
+
+      - name: Assert erlang output
+        env:
+          ACTUAL: ${{ steps.action.outputs.erlang }}
+        run: |
+          echo "actual erlang: $ACTUAL"
+          if [ "$ACTUAL" != "26.0" ]; then
+            echo "FAIL: expected '26.0' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS erlang"

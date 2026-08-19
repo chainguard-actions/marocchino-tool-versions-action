@@ -1,0 +1,30 @@
+name: Test elixir OTP suffix stripping
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create .tool-versions file with elixir OTP version
+        run: |
+          cat > .tool-versions <<'EOF'
+          elixir 1.15.4-otp-26
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          path: .tool-versions
+
+      - name: Assert elixir output strips OTP suffix
+        env:
+          ACTUAL: ${{ steps.action.outputs.elixir }}
+        run: |
+          echo "actual elixir: $ACTUAL"
+          if [ "$ACTUAL" != "1.15.4" ]; then
+            echo "FAIL: expected '1.15.4' (OTP suffix stripped) but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: OTP suffix correctly stripped"
