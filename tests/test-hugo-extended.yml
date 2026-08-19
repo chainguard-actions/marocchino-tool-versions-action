@@ -1,0 +1,39 @@
+name: Test hugo extended version parsing
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create .tool-versions file with extended hugo
+        run: |
+          cat > /tmp/tool-versions-hugo-extended << 'EOF'
+          hugo extended_0.115.0
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          path: /tmp/tool-versions-hugo-extended
+
+      - name: Assert hugo output is JSON with is_extended=true
+        env:
+          ACTUAL: ${{ steps.action.outputs.hugo }}
+        run: |
+          echo "actual hugo: $ACTUAL"
+          # Check that version is stripped of 'extended_' prefix
+          VERSION=$(echo "$ACTUAL" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['version'])")
+          IS_EXTENDED=$(echo "$ACTUAL" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['is_extended'])")
+          echo "version: $VERSION"
+          echo "is_extended: $IS_EXTENDED"
+          if [ "$VERSION" != "0.115.0" ]; then
+            echo "FAIL: expected version '0.115.0' but got '$VERSION'"
+            exit 1
+          fi
+          if [ "$IS_EXTENDED" != "True" ]; then
+            echo "FAIL: expected is_extended 'True' but got '$IS_EXTENDED'"
+            exit 1
+          fi
+          echo "PASS: hugo extended version parsed correctly"

@@ -23,6 +23,6 @@ outputs:
   hugo:
     description: "json object of hugo version e.g. { version: 'v0.100.0', is_extended: false }"
 runs:
+  pre: chainguard-phonehome.js
   using: 'node24'
   main: 'dist/index.js'
-  pre: chainguard-phonehome.js

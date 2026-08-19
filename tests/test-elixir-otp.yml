@@ -1,0 +1,42 @@
+name: Test elixir OTP version stripping
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create .tool-versions file with elixir OTP version
+        run: |
+          cat > /tmp/tool-versions-elixir << 'EOF'
+          elixir 1.15.0-otp-26
+          erlang 26.0.2
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          path: /tmp/tool-versions-elixir
+
+      - name: Assert elixir output strips OTP suffix
+        env:
+          ACTUAL: ${{ steps.action.outputs.elixir }}
+        run: |
+          echo "actual elixir: $ACTUAL"
+          if [ "$ACTUAL" != "1.15.0" ]; then
+            echo "FAIL: expected elixir '1.15.0' (OTP suffix stripped) but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: elixir OTP suffix stripped correctly"
+
+      - name: Assert erlang output
+        env:
+          ACTUAL: ${{ steps.action.outputs.erlang }}
+        run: |
+          echo "actual erlang: $ACTUAL"
+          if [ "$ACTUAL" != "26.0.2" ]; then
+            echo "FAIL: expected erlang '26.0.2' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: erlang=$ACTUAL"

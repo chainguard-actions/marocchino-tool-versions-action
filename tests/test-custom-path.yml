@@ -1,0 +1,43 @@
+name: Test custom path for .tool-versions file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create custom path .tool-versions file
+        run: |
+          mkdir -p /tmp/myproject
+          cat > /tmp/myproject/.tool-versions << 'EOF'
+          nodejs 20.5.0
+          terragrunt 0.48.0
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          path: /tmp/myproject/.tool-versions
+
+      - name: Assert nodejs output from custom path
+        env:
+          ACTUAL: ${{ steps.action.outputs.nodejs }}
+        run: |
+          echo "actual nodejs: $ACTUAL"
+          if [ "$ACTUAL" != "20.5.0" ]; then
+            echo "FAIL: expected nodejs '20.5.0' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: nodejs=$ACTUAL"
+
+      - name: Assert terragrunt output from custom path
+        env:
+          ACTUAL: ${{ steps.action.outputs.terragrunt }}
+        run: |
+          echo "actual terragrunt: $ACTUAL"
+          if [ "$ACTUAL" != "0.48.0" ]; then
+            echo "FAIL: expected terragrunt '0.48.0' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: terragrunt=$ACTUAL"

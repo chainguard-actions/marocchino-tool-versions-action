@@ -1,0 +1,60 @@
+name: Test multiple tools version output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create .tool-versions file with multiple tools
+        run: |
+          cat > /tmp/tool-versions-multi <<'EOF'
+          ruby 3.2.2
+          terraform 1.5.0
+          erlang 26.0
+          terragrunt 0.48.0
+          EOF
+      - id: action
+        uses: .
+        with:
+          path: /tmp/tool-versions-multi
+      - name: Assert ruby output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby }}
+        run: |
+          echo "actual ruby: $ACTUAL"
+          if [ "$ACTUAL" != "3.2.2" ]; then
+            echo "FAIL: expected '3.2.2', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS ruby"
+      - name: Assert terraform output
+        env:
+          ACTUAL: ${{ steps.action.outputs.terraform }}
+        run: |
+          echo "actual terraform: $ACTUAL"
+          if [ "$ACTUAL" != "1.5.0" ]; then
+            echo "FAIL: expected '1.5.0', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS terraform"
+      - name: Assert erlang output
+        env:
+          ACTUAL: ${{ steps.action.outputs.erlang }}
+        run: |
+          echo "actual erlang: $ACTUAL"
+          if [ "$ACTUAL" != "26.0" ]; then
+            echo "FAIL: expected '26.0', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS erlang"
+      - name: Assert terragrunt output
+        env:
+          ACTUAL: ${{ steps.action.outputs.terragrunt }}
+        run: |
+          echo "actual terragrunt: $ACTUAL"
+          if [ "$ACTUAL" != "0.48.0" ]; then
+            echo "FAIL: expected '0.48.0', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS terragrunt"

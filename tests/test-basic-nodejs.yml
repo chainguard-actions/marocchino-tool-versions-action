@@ -1,0 +1,25 @@
+name: Test basic nodejs version output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create .tool-versions file
+        run: |
+          echo "nodejs 18.17.0" > /tmp/tool-versions-basic
+      - id: action
+        uses: .
+        with:
+          path: /tmp/tool-versions-basic
+      - name: Assert nodejs output
+        env:
+          ACTUAL: ${{ steps.action.outputs.nodejs }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "18.17.0" ]; then
+            echo "FAIL: expected '18.17.0', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
