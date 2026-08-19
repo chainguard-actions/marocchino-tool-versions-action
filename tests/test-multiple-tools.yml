@@ -1,0 +1,66 @@
+name: Test multiple tools with elixir OTP suffix stripping
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create .tool-versions file with multiple tools
+        run: |
+          cat > "$GITHUB_WORKSPACE/.tool-versions" <<'EOF'
+          nodejs 14.17.0
+          ruby 3.0.2
+          elixir 1.12.3-otp-24
+          erlang 24.0.5
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          path: ".tool-versions"
+
+      - name: Assert nodejs output
+        env:
+          ACTUAL: ${{ steps.action.outputs.nodejs }}
+        run: |
+          echo "actual nodejs: $ACTUAL"
+          if [ "$ACTUAL" != "14.17.0" ]; then
+            echo "FAIL: expected '14.17.0' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS nodejs"
+
+      - name: Assert ruby output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby }}
+        run: |
+          echo "actual ruby: $ACTUAL"
+          if [ "$ACTUAL" != "3.0.2" ]; then
+            echo "FAIL: expected '3.0.2' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS ruby"
+
+      - name: Assert elixir output (OTP suffix stripped)
+        env:
+          ACTUAL: ${{ steps.action.outputs.elixir }}
+        run: |
+          echo "actual elixir: $ACTUAL"
+          if [ "$ACTUAL" != "1.12.3" ]; then
+            echo "FAIL: expected '1.12.3' (OTP suffix stripped) but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS elixir"
+
+      - name: Assert erlang output
+        env:
+          ACTUAL: ${{ steps.action.outputs.erlang }}
+        run: |
+          echo "actual erlang: $ACTUAL"
+          if [ "$ACTUAL" != "24.0.5" ]; then
+            echo "FAIL: expected '24.0.5' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS erlang"
