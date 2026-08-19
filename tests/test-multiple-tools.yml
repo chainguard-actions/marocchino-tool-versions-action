@@ -1,0 +1,57 @@
+name: Test multiple tools version output
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          path: ${{ github.workspace }}/tests/fixtures/multiple-tools/.tool-versions
+
+      - name: Assert nodejs output
+        env:
+          ACTUAL: ${{ steps.action.outputs.nodejs }}
+        run: |
+          echo "actual nodejs: $ACTUAL"
+          if [ "$ACTUAL" != "18.0.0" ]; then
+            echo "FAIL: expected nodejs '18.0.0' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS nodejs"
+
+      - name: Assert ruby output
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby }}
+        run: |
+          echo "actual ruby: $ACTUAL"
+          if [ "$ACTUAL" != "3.1.2" ]; then
+            echo "FAIL: expected ruby '3.1.2' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS ruby"
+
+      - name: Assert elixir output
+        env:
+          ACTUAL: ${{ steps.action.outputs.elixir }}
+        run: |
+          echo "actual elixir: $ACTUAL"
+          if [ "$ACTUAL" != "1.13.4" ]; then
+            echo "FAIL: expected elixir '1.13.4' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS elixir"
+
+      - name: Assert erlang output
+        env:
+          ACTUAL: ${{ steps.action.outputs.erlang }}
+        run: |
+          echo "actual erlang: $ACTUAL"
+          if [ "$ACTUAL" != "25.0" ]; then
+            echo "FAIL: expected erlang '25.0' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS erlang"

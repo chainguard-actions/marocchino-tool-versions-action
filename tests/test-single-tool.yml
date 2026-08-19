@@ -1,0 +1,52 @@
+name: Test single tool in .tool-versions file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create .tool-versions file with only nodejs
+        run: |
+          cat > .tool-versions <<'EOF'
+          nodejs 16.20.0
+          EOF
+
+      - id: action
+        uses: .
+        with:
+          path: .tool-versions
+
+      - name: Assert nodejs output is set
+        env:
+          ACTUAL: ${{ steps.action.outputs.nodejs }}
+        run: |
+          echo "actual nodejs: $ACTUAL"
+          if [ "$ACTUAL" != "16.20.0" ]; then
+            echo "FAIL: expected nodejs '16.20.0', got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: nodejs=$ACTUAL"
+
+      - name: Assert ruby output is empty when not in file
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby }}
+        run: |
+          echo "actual ruby: '$ACTUAL'"
+          if [ -n "$ACTUAL" ]; then
+            echo "FAIL: expected ruby to be empty, got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: ruby is empty as expected"
+
+      - name: Assert elixir output is empty when not in file
+        env:
+          ACTUAL: ${{ steps.action.outputs.elixir }}
+        run: |
+          echo "actual elixir: '$ACTUAL'"
+          if [ -n "$ACTUAL" ]; then
+            echo "FAIL: expected elixir to be empty, got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS: elixir is empty as expected"

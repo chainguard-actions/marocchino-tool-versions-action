@@ -1,0 +1,24 @@
+name: Test custom path for .tool-versions file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          path: ${{ github.workspace }}/tests/fixtures/custom-path/.tool-versions
+
+      - name: Assert ruby output from custom path
+        env:
+          ACTUAL: ${{ steps.action.outputs.ruby }}
+        run: |
+          echo "actual: $ACTUAL"
+          if [ "$ACTUAL" != "2.7.6" ]; then
+            echo "FAIL: expected ruby '2.7.6' but got '$ACTUAL'"
+            exit 1
+          fi
+          echo "PASS"
